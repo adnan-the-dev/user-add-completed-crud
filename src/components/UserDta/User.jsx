@@ -2,11 +2,18 @@ import React, { useEffect, useRef, useState } from "react";
 import "./user.css";
 import UpdateIcon from "@mui/icons-material/Update";
 import DeleteIcon from "@mui/icons-material/Delete";
+import Snackbar from '@mui/material/Snackbar';
+
+
 function User() {
   const [userData, setUserData] = useState([]);
-  console.log(userData);
   const [userId, setUserId] = useState(1);
   const [uniqIde, setUniqIde] = useState();
+  const [snackBar, setSnackBar] = useState({
+    active: false,
+    message: "This is a message.",
+    type: "danger"
+  })
   //   console.log(uniqIde);
   const [searchQuery, setSearchQuery] = useState("");
   let one = useRef();
@@ -22,23 +29,23 @@ function User() {
       _id,
       rendomId,
     };
-    userData.push(data);
-    setUserData([...userData]);
+    if(userExists(name)) {
+      setSnackBar({message: "User already exists", type: "danger", active: true})
+      return;
+    };
+    // chekedUpdate(name);
+    // userData.push(data);
+    setUserData(users => [...users, data]);
     conter();
     uniqId();
-    chekedUpdate();
     one.current.value = "";
     two.current.value = "";
   }
   useEffect(() => {
     uniqId();
   }, []);
-  function chekedUpdate(){
-      userData.every((term)=>{
-        if(term.name == name){
-            alert("helloj")
-        }
-      })
+  function userExists(name){
+      return userData.some((user)=>user.name == name)
   }
   function conter() {
     setUserId(userId + 1);
@@ -61,9 +68,16 @@ function User() {
     // let id = Math.floor(Math.random() * 100)
     setUniqIde(id);
   }
-  
+  const handleClose = ()=>setSnackBar((old)=>({...old,active: false}))
   return (
     <>
+    <Snackbar
+      open={snackBar.active}
+      autoHideDuration={3000}
+      onClose={handleClose}
+      message={snackBar.message}
+      action={()=>{}}
+    />
       <div className="header">
         <div className="firt-box">
           <input
@@ -127,9 +141,12 @@ function User() {
                   aria-label="UpdateIcon"
                   sx={{ cursor: "pointer" }}
                   onClick={() => {
-                    item.name = one;
-                    item.city = two;
-                    setUserData([...userData]);
+                    const name = one.current.value;
+                    const city = two.current.value;
+                    
+                    setUserData(users => users.map(user=> user.rendomId == item.rendomId? {
+                      ...item, name, city
+                    }: user));
                   }}
                 />
               </th>
